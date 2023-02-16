@@ -3,7 +3,6 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import MyRoutes from "./my-routes";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 
 const app = firebase.initializeApp({
 	apiKey: process.env.REACT_APP_API_KEY,
@@ -16,6 +15,7 @@ const app = firebase.initializeApp({
 });
 
 export { app };
+
 export const auth = firebase.auth(app);
 export const firestore = firebase.firestore();
 const STRONG_PASSWORD = new RegExp(process.env.REACT_APP_PASSWORD_REQS);
@@ -24,13 +24,7 @@ function App() {
 	const [user] = useAuthState(auth);
 	return (
 		<div className="bg-main w-screen h-screen font-roboto overflow-hidden">
-			<MyRoutes
-				auth={auth}
-				firebase={firebase}
-				collections={useCollectionData}
-				isAuthenticated={user}
-				strPwdTest={STRONG_PASSWORD}
-			/>
+			<MyRoutes isAuthenticated={user} strPwdTest={STRONG_PASSWORD} />
 		</div>
 	);
 }

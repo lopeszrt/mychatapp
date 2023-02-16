@@ -4,8 +4,9 @@ import { redirect } from "react-router-dom";
 import KUTE from "kute.js";
 import logo_app from "./images/logo_app.png";
 import HANDLERS from "./handlers/handlers";
-import { auth } from "./App";
+import { auth, firestore } from "./App";
 import firebase from "firebase/compat/app";
+import uuid from "react-uuid";
 
 export default function Sign({ pwdTestReg }) {
 	useEffect(() => {
@@ -131,10 +132,30 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 		auth
 			.createUserWithEmailAndPassword(email, password)
 			.then((credential) => {
-				let user = credential.user;
 				let defaultName = email.split("@")[0];
-				let res = HANDLERS.USER.PROFILE.DISPLAY_NAME(user, defaultName);
-				console.log(res);
+				HANDLERS.USER.PROFILE.DISPLAY_NAME(credential.user, defaultName);
+				let user = {
+					email: credential.user.email,
+					name: credential.user.displayName | "",
+					profilePicture: credential.user.photoURL | "",
+					friends: [],
+					channels: [],
+					servers: [],
+					blocked: [],
+					requests: {
+						incoming: [],
+						outgoing: [],
+					},
+				};
+				let publicUser = {
+					profilePicture: credential.user.photoURL | "",
+					name: credential.user.displayName | "",
+					description: "",
+					status: "online",
+					createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+				};
+				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
+
 				auth.signInWithEmailAndPassword(email, password);
 			})
 			.catch(function (error) {
@@ -175,7 +196,10 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 						className="input"
 						type="text"
 						value={emailVal}
-						onChange={(text) => setEmailVal(text.target.value)}
+						onChange={(text) => {
+							text.preventDefault();
+							setEmailVal(text.target.value);
+						}}
 						name="email"
 						placeholder="name@example.com"
 					/>
@@ -183,7 +207,10 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 						className="input"
 						type="password"
 						value={passwordVal}
-						onChange={(text) => setPasswordVal(text.target.value)}
+						onChange={(text) => {
+							text.preventDefault();
+							setPasswordVal(text.target.value);
+						}}
 						name="password"
 						placeholder="•••••••••"
 					/>
@@ -192,7 +219,8 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 					<button
 						className="singPageBtns"
 						type="submit"
-						onClick={() => {
+						onClick={(e) => {
+							e.preventDefault();
 							createAccount(emailVal, passwordVal);
 						}}>
 						Sign Up
@@ -200,7 +228,8 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 					<button
 						className="singPageBtns"
 						type="submit"
-						onClick={() => {
+						onClick={(e) => {
+							e.preventDefault();
 							setNewValue(false);
 							setErrorState(false);
 							setErrorMessage("");
@@ -229,36 +258,62 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 			return;
 		}
 
-		auth.signInWithEmailAndPassword(email, password).catch((error) => {
-			switch (true) {
-				case error.code.includes("auth/invalid-email"):
-					setErrorMessage(
-						`${email} is not a valid email. Desired format: name@example.com`
-					);
-					break;
-				case error.code.includes("auth/user-disabled"):
-					setErrorMessage(
-						`The User with the email "${email}" is banned from using My Chat App. To revoke the ban, contact support.`
-					);
-					break;
-				case error.code.includes("auth/user-not-found"):
-					setErrorMessage(
-						`The user could not be found with the provided email address or wrong password!`
-					);
-					break;
-				case error.code.includes("auth/wrong-password"):
-					setErrorMessage(
-						`The user could not be found with the provided email address or wrong password!`
-					);
-					break;
-				default:
-					break;
-			}
-			setErrorState(true);
-			setEmailVal("");
-			setPasswordVal("");
-			return;
-		});
+		auth
+			.signInWithEmailAndPassword(email, password)
+			.then((credential) => {
+				let user = {
+					email: credential.user.email,
+					name: credential.user.displayName,
+					profilePicture: credential.user.photoURL,
+					friends: [],
+					channels: [],
+					servers: [],
+					blocked: [],
+					requests: {
+						incoming: [],
+						outgoing: [],
+					},
+				};
+				let publicUser = {
+					profilePicture: credential.user.photoURL,
+					name: credential.user.displayName,
+					description: "",
+					status: "online",
+					createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+				};
+
+				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
+			})
+			.catch((error) => {
+				switch (true) {
+					case error.code.includes("auth/invalid-email"):
+						setErrorMessage(
+							`${email} is not a valid email. Desired format: name@example.com`
+						);
+						break;
+					case error.code.includes("auth/user-disabled"):
+						setErrorMessage(
+							`The User with the email "${email}" is banned from using My Chat App. To revoke the ban, contact support.`
+						);
+						break;
+					case error.code.includes("auth/user-not-found"):
+						setErrorMessage(
+							`The user could not be found with the provided email address or wrong password!`
+						);
+						break;
+					case error.code.includes("auth/wrong-password"):
+						setErrorMessage(
+							`The user could not be found with the provided email address or wrong password!`
+						);
+						break;
+					default:
+						break;
+				}
+				setErrorState(true);
+				setEmailVal("");
+				setPasswordVal("");
+				return;
+			});
 		setEmailVal("");
 		setPasswordVal("");
 		redirect("/app");
@@ -273,7 +328,10 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 							className="input"
 							type="text"
 							value={emailVal}
-							onChange={(text) => setEmailVal(text.target.value)}
+							onChange={(text) => {
+								text.preventDefault();
+								setEmailVal(text.target.value);
+							}}
 							name="email"
 							placeholder="name@example.com"
 						/>
@@ -283,7 +341,10 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 							className="input"
 							type="password"
 							value={passwordVal}
-							onChange={(text) => setPasswordVal(text.target.value)}
+							onChange={(text) => {
+								text.preventDefault();
+								setPasswordVal(text.target.value);
+							}}
 							name="password"
 							placeholder="•••••••••"
 						/>
@@ -291,7 +352,8 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 					<div className="text-white text-xs md:text-base pt-4">
 						Forgotten Password?
 						<div
-							onClick={() => {
+							onClick={(e) => {
+								e.preventDefault();
 								pwdRT(true);
 							}}
 							className="inline ml-1 cursor-pointer text-blue-500">

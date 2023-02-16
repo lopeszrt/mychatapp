@@ -6,7 +6,7 @@ import {
 	confirmPasswordReset,
 } from "firebase/auth";
 import { useLocation } from "react-router-dom";
-import { auth } from "../App";
+import { auth, firestore } from "../App";
 
 function CHANGE_DISPLAY_NAME(user, newName) {
 	return updateProfile(user, { displayName: newName, photoURL: user.photoURL });
@@ -17,6 +17,24 @@ function CHANGE_DISPLAY_IMAGE(user, newImageURL) {
 		displayName: user.displayName,
 		photoURL: newImageURL,
 	});
+}
+
+async function GET_USER_DATA(colection, userUID) {
+	return firestore
+		.collection(colection)
+		.doc(userUID)
+		.get()
+		.then((val) => {
+			return val.data();
+		});
+}
+
+async function CREATE_USER_INFO(user, publicUser, uid) {
+	return firestore
+		.collection("user")
+		.doc(uid)
+		.set(user)
+		.then(() => firestore.collection("publicUser").doc(uid).set(publicUser));
 }
 
 function CHANGE_DESCRIPTION() {
@@ -56,6 +74,11 @@ export const PASSWORD_HANDLERS = {
 	RESET: PASSWORD_RESET_HANDLER,
 };
 
+export const DATABASE_HANDLERS = {
+	GET_USER: GET_USER_DATA,
+	CREATE_USER: CREATE_USER_INFO,
+};
+
 export const USER_HANDLERS = {
 	PASSWORD: PASSWORD_HANDLERS,
 	PROFILE: PROFILE_HANDLERS,
@@ -69,6 +92,7 @@ export const PAGE_HANDLERS = {
 const HANDLERS = {
 	USER: USER_HANDLERS,
 	PAGE: PAGE_HANDLERS,
+	DATABASE: DATABASE_HANDLERS,
 };
 
 export default HANDLERS;

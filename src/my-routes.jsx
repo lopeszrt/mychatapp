@@ -14,7 +14,7 @@ import Loader from "./Loader";
 import NotFound from "./NotFound";
 import PasswordReset from "./security/passwordReset";
 import Support from "./support";
-import { app } from "./App";
+import firebase from "firebase/compat/app";
 
 export default function MyRoutes(props) {
 	return (
@@ -37,7 +37,7 @@ class AuthenticatedRoutes extends React.Component {
 	}
 
 	componentDidMount() {
-		app.auth().onAuthStateChanged((user) => {
+		firebase.auth().onAuthStateChanged((user) => {
 			this.setState({ isAuthenticated: !!user, loading: false });
 		});
 	}
