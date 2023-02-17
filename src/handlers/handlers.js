@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { useLocation } from "react-router-dom";
 import { auth, firestore } from "../App";
+import { useDocument } from "react-firebase-hooks/firestore";
 
 function CHANGE_DISPLAY_NAME(user, newName) {
 	return updateProfile(user, { displayName: newName, photoURL: user.photoURL });
@@ -19,18 +20,13 @@ function CHANGE_DISPLAY_IMAGE(user, newImageURL) {
 	});
 }
 
-async function GET_USER_DATA(colection, userUID) {
-	return firestore
-		.collection(colection)
-		.doc(userUID)
-		.get()
-		.then((val) => {
-			return val.data();
-		});
+function GET_USER_DATA(colection, userUID) {
+	const userRef = firestore.collection(colection).doc(userUID);
+	return useDocument(userRef);
 }
 
-async function CREATE_USER_INFO(user, publicUser, uid) {
-	return firestore
+function CREATE_USER_INFO(user, publicUser, uid) {
+	firestore
 		.collection("user")
 		.doc(uid)
 		.set(user)

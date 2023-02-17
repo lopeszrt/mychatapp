@@ -246,7 +246,8 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 	let [emailVal, setEmailVal] = useState("");
 	let [passwordVal, setPasswordVal] = useState("");
 
-	const signedInWithGoogle = () => {
+	const signedInWithGoogle = (e) => {
+		e.preventDefault();
 		const provider = new firebase.auth.GoogleAuthProvider();
 		auth.signInWithPopup(provider);
 	};
@@ -376,7 +377,8 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 					<button
 						className="singPageBtns"
 						type="submit"
-						onClick={() => {
+						onClick={(e) => {
+							e.preventDefault();
 							login(emailVal, passwordVal);
 						}}>
 						Sign In
@@ -384,7 +386,8 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 					<button
 						className="singPageBtns"
 						type="submit"
-						onClick={() => {
+						onClick={(e) => {
+							e.preventDefault();
 							setNewValue(true);
 							setErrorState(false);
 							setErrorMessage("");
@@ -428,7 +431,10 @@ function Reset({ pwdRT, setErrorMessage, setErrorState, info }) {
 						className="input"
 						type="text"
 						value={inputVal}
-						onChange={(text) => setInputVal(text.target.value)}
+						onChange={(text) => {
+							text.preventDefault();
+							setInputVal(text.target.value);
+						}}
 						name="password"
 						placeholder="name@example.com"
 					/>
@@ -437,7 +443,8 @@ function Reset({ pwdRT, setErrorMessage, setErrorState, info }) {
 					<button
 						className="singPageBtns"
 						type="submit"
-						onClick={() => {
+						onClick={(e) => {
+							e.preventDefault();
 							passwordRecoverHelper(inputVal);
 						}}>
 						Send Recovery Email
@@ -445,7 +452,8 @@ function Reset({ pwdRT, setErrorMessage, setErrorState, info }) {
 					<button
 						className="singPageBtns"
 						type="submit"
-						onClick={() => {
+						onClick={(e) => {
+							e.preventDefault();
 							pwdRT(false);
 						}}>
 						Go to Sign In
