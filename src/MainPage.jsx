@@ -10,6 +10,7 @@ export default function MainPage() {
 		"user",
 		auth.currentUser.uid
 	);
+
 	return (
 		<div className="text-white">
 			<Helmet>
@@ -17,7 +18,7 @@ export default function MainPage() {
 			</Helmet>
 			<div>
 				{loading && <Loader />}
-				{user && <span>User: {user.data().email}</span>}
+				{user && <>User: {user.data().email}</>}
 			</div>
 		</div>
 	);

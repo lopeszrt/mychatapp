@@ -132,12 +132,15 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 		auth
 			.createUserWithEmailAndPassword(email, password)
 			.then((credential) => {
-				let defaultName = email.split("@")[0];
-				HANDLERS.USER.PROFILE.DISPLAY_NAME(credential.user, defaultName);
-				let user = {
+				let defaultName = credential.user.displayName;
+				const serverTime = firebase.firestore.FieldValue.serverTimestamp();
+				if (!defaultName) defaultName = email.split("@")[0];
+				const user = {
+					uid: credential.user.uid,
 					email: credential.user.email,
-					name: credential.user.displayName | "",
-					profilePicture: credential.user.photoURL | "",
+					name: credential.user.displayName,
+					profilePicture: credential.user.photoURL,
+					createdAt: serverTime,
 					friends: [],
 					channels: [],
 					servers: [],
@@ -147,15 +150,22 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 						outgoing: [],
 					},
 				};
-				let publicUser = {
-					profilePicture: credential.user.photoURL | "",
-					name: credential.user.displayName | "",
+				const publicUser = {
+					uid: credential.user.uid,
+					name: credential.user.displayName,
+					profilePicture: credential.user.photoURL,
+					createdAt: serverTime,
 					description: "",
-					status: "online",
-					createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+					status: {
+						typeOf: "online",
+					},
 				};
 				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
-
+				HANDLERS.USER.PROFILE.DISPLAY_NAME(
+					credential.user,
+					defaultName,
+					"user"
+				);
 				auth.signInWithEmailAndPassword(email, password);
 			})
 			.catch(function (error) {

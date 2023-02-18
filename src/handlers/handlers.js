@@ -9,8 +9,10 @@ import { useLocation } from "react-router-dom";
 import { auth, firestore } from "../App";
 import { useDocument } from "react-firebase-hooks/firestore";
 
-function CHANGE_DISPLAY_NAME(user, newName) {
-	return updateProfile(user, { displayName: newName, photoURL: user.photoURL });
+function CHANGE_DISPLAY_NAME(user, newName, collection) {
+	const Ref = firestore.collection(collection).doc(user.uid);
+	Ref.update({ name: newName });
+	updateProfile(user, { displayName: newName, photoURL: user.photoURL });
 }
 
 function CHANGE_DISPLAY_IMAGE(user, newImageURL) {
@@ -20,8 +22,8 @@ function CHANGE_DISPLAY_IMAGE(user, newImageURL) {
 	});
 }
 
-function GET_USER_DATA(colection, userUID) {
-	const userRef = firestore.collection(colection).doc(userUID);
+function GET_USER_DATA(collection, userUID) {
+	const userRef = firestore.collection(collection).doc(userUID);
 	return useDocument(userRef);
 }
 
