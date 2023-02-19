@@ -4,9 +4,8 @@ import { redirect } from "react-router-dom";
 import KUTE from "kute.js";
 import logo_app from "./images/logo_app.png";
 import HANDLERS from "./handlers/handlers";
-import { auth, firestore } from "./App";
+import { auth } from "./App";
 import firebase from "firebase/compat/app";
-import uuid from "react-uuid";
 
 export default function Sign({ pwdTestReg }) {
 	useEffect(() => {
@@ -132,17 +131,20 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 		auth
 			.createUserWithEmailAndPassword(email, password)
 			.then((credential) => {
-				let defaultName = credential.user.displayName;
+				const defaultName = email.split("@")[0];
+				let photoUrl = "";
+				if (credential.user.photoURL) {
+					photoUrl = credential.user.photoURL;
+				}
+
 				const serverTime = firebase.firestore.FieldValue.serverTimestamp();
-				if (!defaultName) defaultName = email.split("@")[0];
 				const user = {
 					uid: credential.user.uid,
-					email: credential.user.email,
-					name: credential.user.displayName,
-					profilePicture: credential.user.photoURL,
+					name: defaultName,
+					profilePicture: photoUrl,
 					createdAt: serverTime,
 					friends: [],
-					channels: [],
+					friendchats: [],
 					servers: [],
 					blocked: [],
 					requests: {
@@ -152,20 +154,21 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 				};
 				const publicUser = {
 					uid: credential.user.uid,
-					name: credential.user.displayName,
-					profilePicture: credential.user.photoURL,
+					name: defaultName,
+					profilePicture: photoUrl,
 					createdAt: serverTime,
 					description: "",
 					status: {
 						typeOf: "online",
 					},
 				};
-				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
 				HANDLERS.USER.PROFILE.DISPLAY_NAME(
 					credential.user,
 					defaultName,
-					"user"
-				);
+					true
+				).then((_) => {
+					HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
+				});
 				auth.signInWithEmailAndPassword(email, password);
 			})
 			.catch(function (error) {
@@ -269,62 +272,36 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 			return;
 		}
 
-		auth
-			.signInWithEmailAndPassword(email, password)
-			.then((credential) => {
-				let user = {
-					email: credential.user.email,
-					name: credential.user.displayName,
-					profilePicture: credential.user.photoURL,
-					friends: [],
-					channels: [],
-					servers: [],
-					blocked: [],
-					requests: {
-						incoming: [],
-						outgoing: [],
-					},
-				};
-				let publicUser = {
-					profilePicture: credential.user.photoURL,
-					name: credential.user.displayName,
-					description: "",
-					status: "online",
-					createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-				};
-
-				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
-			})
-			.catch((error) => {
-				switch (true) {
-					case error.code.includes("auth/invalid-email"):
-						setErrorMessage(
-							`${email} is not a valid email. Desired format: name@example.com`
-						);
-						break;
-					case error.code.includes("auth/user-disabled"):
-						setErrorMessage(
-							`The User with the email "${email}" is banned from using My Chat App. To revoke the ban, contact support.`
-						);
-						break;
-					case error.code.includes("auth/user-not-found"):
-						setErrorMessage(
-							`The user could not be found with the provided email address or wrong password!`
-						);
-						break;
-					case error.code.includes("auth/wrong-password"):
-						setErrorMessage(
-							`The user could not be found with the provided email address or wrong password!`
-						);
-						break;
-					default:
-						break;
-				}
-				setErrorState(true);
-				setEmailVal("");
-				setPasswordVal("");
-				return;
-			});
+		auth.signInWithEmailAndPassword(email, password).catch((error) => {
+			switch (true) {
+				case error.code.includes("auth/invalid-email"):
+					setErrorMessage(
+						`${email} is not a valid email. Desired format: name@example.com`
+					);
+					break;
+				case error.code.includes("auth/user-disabled"):
+					setErrorMessage(
+						`The User with the email "${email}" is banned from using My Chat App. To revoke the ban, contact support.`
+					);
+					break;
+				case error.code.includes("auth/user-not-found"):
+					setErrorMessage(
+						`The user could not be found with the provided email address or wrong password!`
+					);
+					break;
+				case error.code.includes("auth/wrong-password"):
+					setErrorMessage(
+						`The user could not be found with the provided email address or wrong password!`
+					);
+					break;
+				default:
+					break;
+			}
+			setErrorState(true);
+			setEmailVal("");
+			setPasswordVal("");
+			return;
+		});
 		setEmailVal("");
 		setPasswordVal("");
 		redirect("/app");

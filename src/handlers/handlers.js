@@ -9,10 +9,21 @@ import { useLocation } from "react-router-dom";
 import { auth, firestore } from "../App";
 import { useDocument } from "react-firebase-hooks/firestore";
 
-function CHANGE_DISPLAY_NAME(user, newName, collection) {
-	const Ref = firestore.collection(collection).doc(user.uid);
-	Ref.update({ name: newName });
-	updateProfile(user, { displayName: newName, photoURL: user.photoURL });
+async function CHANGE_DISPLAY_NAME(user, newName, signup) {
+	if (signup)
+		return updateProfile(user, {
+			displayName: newName,
+			photoURL: user.photoURL,
+		});
+	const privUser = firestore.collection("user").doc(user.uid);
+	const publicUser = firestore.collection("publicUser").doc(user.uid);
+
+	privUser.update({ name: newName });
+	publicUser.update({ name: newName });
+	updateProfile(user, {
+		displayName: newName,
+		photoURL: user.photoURL,
+	});
 }
 
 function CHANGE_DISPLAY_IMAGE(user, newImageURL) {
@@ -22,9 +33,19 @@ function CHANGE_DISPLAY_IMAGE(user, newImageURL) {
 	});
 }
 
-function GET_USER_DATA(collection, userUID) {
-	const userRef = firestore.collection(collection).doc(userUID);
+function GET_USER_DATA(userUID) {
+	const userRef = firestore.collection("user").doc(userUID);
 	return useDocument(userRef);
+}
+
+function GET_PUBLIC_USER(userID) {
+	return firestore
+		.collection("publicUser")
+		.doc(userID)
+		.get()
+		.then((val) => {
+			return val.data();
+		});
 }
 
 function CREATE_USER_INFO(user, publicUser, uid) {
@@ -74,6 +95,7 @@ export const PASSWORD_HANDLERS = {
 
 export const DATABASE_HANDLERS = {
 	GET_USER: GET_USER_DATA,
+	GET_PUBLIC_USER: GET_PUBLIC_USER,
 	CREATE_USER: CREATE_USER_INFO,
 };
 
