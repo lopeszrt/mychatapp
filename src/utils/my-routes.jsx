@@ -5,15 +5,15 @@ import {
 	BrowserRouter as Router,
 	Routes,
 } from "react-router-dom";
-import Home from "./Home";
-import Sign from "./Login";
-import Channel from "./channel";
-import Server from "./server";
-import MainPage from "./MainPage";
+import Home from "../Pages/Home";
+import Sign from "../App/pages/Login";
+import Channel from "../App/pages/DirectMessage";
+import Server from "../App/pages/Server";
+import MainPage from "../App/pages/MainPage";
 import Loader from "./Loader";
 import NotFound from "./NotFound";
 import PasswordReset from "./security/passwordReset";
-import Support from "./support";
+import Support from "../Pages/support";
 import firebase from "firebase/compat/app";
 
 export default function MyRoutes(props) {

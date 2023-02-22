@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import HANDLERS from "../handlers/handlers";
+import HANDLERS from "../../handlers/handlers";
 import { Navigate } from "react-router-dom";
-import logo_app from "../images/logo_app.png";
+import logo_app from "../../images/logo_app.png";
 
 export default function PasswordReset(props) {
 	let query = HANDLERS.PAGE.QUERY();

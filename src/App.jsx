@@ -1,7 +1,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
-import MyRoutes from "./my-routes";
+import MyRoutes from "./utils/my-routes";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const app = firebase.initializeApp({

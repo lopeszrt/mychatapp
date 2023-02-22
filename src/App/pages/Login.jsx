@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import "./tailwind.css";
+import "../../Assets/tailwind.css";
 import { redirect } from "react-router-dom";
 import KUTE from "kute.js";
-import logo_app from "./images/logo_app.png";
-import HANDLERS from "./handlers/handlers";
-import { auth } from "./App";
+import logo_app from "../../images/logo_app.png";
+import HANDLERS from "../../handlers/handlers";
+import { auth } from "../../App";
 import firebase from "firebase/compat/app";
 
 export default function Sign({ pwdTestReg }) {
@@ -144,7 +144,6 @@ function SignUp({ setErrorState, setErrorMessage, setNewValue, pwdTestReg }) {
 					profilePicture: photoUrl,
 					createdAt: serverTime,
 					friends: [],
-					friendchats: [],
 					servers: [],
 					blocked: [],
 					requests: {
@@ -262,7 +261,49 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 	const signedInWithGoogle = (e) => {
 		e.preventDefault();
 		const provider = new firebase.auth.GoogleAuthProvider();
-		auth.signInWithPopup(provider);
+		auth.signInWithPopup(provider).then((credential) => {
+			let defaultName = "";
+			let photoUrl = "";
+			if (credential.user.photoURL) {
+				photoUrl = credential.user.photoURL;
+			}
+
+			if (credential.user.displayName) {
+				defaultName = credential.user.displayName;
+			}
+
+			const serverTime = firebase.firestore.FieldValue.serverTimestamp();
+			const user = {
+				uid: credential.user.uid,
+				name: defaultName,
+				profilePicture: photoUrl,
+				createdAt: serverTime,
+				friends: [],
+				servers: [],
+				blocked: [],
+				requests: {
+					incoming: [],
+					outgoing: [],
+				},
+			};
+			const publicUser = {
+				uid: credential.user.uid,
+				name: defaultName,
+				profilePicture: photoUrl,
+				createdAt: serverTime,
+				description: "",
+				status: {
+					typeOf: "online",
+				},
+			};
+			HANDLERS.USER.PROFILE.DISPLAY_NAME(
+				credential.user,
+				defaultName,
+				true
+			).then((_) => {
+				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
+			});
+		});
 	};
 
 	const login = (email, password) => {

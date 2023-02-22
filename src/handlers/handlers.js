@@ -39,13 +39,8 @@ function GET_USER_DATA(userUID) {
 }
 
 function GET_PUBLIC_USER(userID) {
-	return firestore
-		.collection("publicUser")
-		.doc(userID)
-		.get()
-		.then((val) => {
-			return val.data();
-		});
+	const userRef = firestore.collection("publicUser").doc(userID);
+	return useDocument(userRef);
 }
 
 function CREATE_USER_INFO(user, publicUser, uid) {
