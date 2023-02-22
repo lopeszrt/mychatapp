@@ -3,6 +3,7 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import MyRoutes from "./utils/my-routes";
 import { useAuthState } from "react-firebase-hooks/auth";
+import ActivityHandler from "./utils/activityHandler";
 
 const app = firebase.initializeApp({
 	apiKey: process.env.REACT_APP_API_KEY,
@@ -22,9 +23,11 @@ const STRONG_PASSWORD = new RegExp(process.env.REACT_APP_PASSWORD_REQS);
 
 function App() {
 	const [user] = useAuthState(auth);
+
 	return (
 		<div className="bg-main w-screen h-screen font-roboto overflow-hidden">
 			<MyRoutes isAuthenticated={user} strPwdTest={STRONG_PASSWORD} />
+			{user && <ActivityHandler options={{ timeToIdle: 600000 }} user={user} />}
 		</div>
 	);
 }

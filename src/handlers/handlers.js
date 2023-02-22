@@ -9,20 +9,27 @@ import { useLocation } from "react-router-dom";
 import { auth, firestore } from "../App";
 import { useDocument } from "react-firebase-hooks/firestore";
 
-async function CHANGE_DISPLAY_NAME(user, newName, signup) {
-	if (signup)
-		return updateProfile(user, {
-			displayName: newName,
-			photoURL: user.photoURL,
-		});
+async function CHANGE_DISPLAY_NAME(user, newName) {
 	const privUser = firestore.collection("user").doc(user.uid);
 	const publicUser = firestore.collection("publicUser").doc(user.uid);
 
 	privUser.update({ name: newName });
 	publicUser.update({ name: newName });
-	updateProfile(user, {
-		displayName: newName,
-		photoURL: user.photoURL,
+}
+
+function UPDATE_USER_STATUS(
+	userUid,
+	newStatus,
+	previousStatus,
+	newCustomStatus
+) {
+	const user = firestore.collection("publicUser").doc(userUid);
+	user.update({
+		status: {
+			typeOf: newStatus,
+			previous: previousStatus,
+			custom: newCustomStatus,
+		},
 	});
 }
 
@@ -81,6 +88,7 @@ export const PROFILE_HANDLERS = {
 	DISPLAY_NAME: CHANGE_DISPLAY_NAME,
 	DISPLAY_IMAGE: CHANGE_DISPLAY_IMAGE,
 	DESCRIPTION: CHANGE_DESCRIPTION,
+	STATUS: UPDATE_USER_STATUS,
 };
 
 export const PASSWORD_HANDLERS = {

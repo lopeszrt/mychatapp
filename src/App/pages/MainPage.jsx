@@ -6,7 +6,7 @@ import { DATABASE_HANDLERS } from "../../handlers/handlers";
 import { auth } from "../../App";
 import FriendsList from "../components/friends";
 import placeholder from "../../images/placeholder.png";
-import { Navigate, redirect } from "react-router-dom";
+import { redirect } from "react-router-dom";
 
 export default function MainPage() {
 	const [user, loading] = DATABASE_HANDLERS.GET_USER(auth.currentUser.uid);

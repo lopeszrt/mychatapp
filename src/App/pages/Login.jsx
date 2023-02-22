@@ -294,15 +294,11 @@ function SignIn({ setErrorMessage, setErrorState, setNewValue, pwdRT }) {
 				description: "",
 				status: {
 					typeOf: "online",
+					previous: "online",
+					custom: "",
 				},
 			};
-			HANDLERS.USER.PROFILE.DISPLAY_NAME(
-				credential.user,
-				defaultName,
-				true
-			).then((_) => {
-				HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
-			});
+			HANDLERS.DATABASE.CREATE_USER(user, publicUser, credential.user.uid);
 		});
 	};
 
