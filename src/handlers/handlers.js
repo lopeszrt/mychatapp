@@ -24,7 +24,7 @@ function UPDATE_USER_STATUS(
 	newCustomStatus
 ) {
 	const user = firestore.collection("publicUser").doc(userUid);
-	user.update({
+	return user.update({
 		status: {
 			typeOf: newStatus,
 			previous: previousStatus,

@@ -27,7 +27,7 @@ function App() {
 	return (
 		<div className="bg-main w-screen h-screen font-roboto overflow-hidden">
 			<MyRoutes isAuthenticated={user} strPwdTest={STRONG_PASSWORD} />
-			{user && <ActivityHandler options={{ timeToIdle: 600000 }} user={user} />}
+			{user && <ActivityHandler useruid={user.uid} />}
 		</div>
 	);
 }
