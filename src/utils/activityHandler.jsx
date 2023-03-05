@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import HANDLERS from "../handlers/handlers";
 import { useState } from "react";
 
@@ -8,41 +8,11 @@ export default function ActivityHandler({ useruid }) {
 }
 
 function ActivityHelper({ user }) {
-	let [lastState, setLastState] = useState("");
-	function onIdle() {
-		if ("idle" !== lastState) {
-			console.log("idle");
-			toggleIdle("idle", setLastState);
-			return;
-		}
-
-		return console.log("already in this state");
-	}
-
-	function onActive() {
-		if ("online" !== lastState) {
-			console.log("active");
-			toggleIdle("online", setLastState);
-			return;
-		}
-
-		return console.log("already in this state");
-	}
-
-	function toggleIdle(status, setStatus) {
-		if (user.status.typeOf === "dnd") return;
-		setStatus(status);
-		/* HANDLERS.USER.PROFILE.STATUS(
-			user.uid,
-			status,
-			user.status.typeOf,
-			user.status.custom
-		) */
-	}
+	let [isIdle, setIdle] = useState(false);
 	function useCheckOnline(user) {
-		const ttl = new Date.now();
 		useEffect(() => {}, []);
-		useEffect(() => {}, []);
+		useEffect(() => {
+		}, []);
 		useEffect(() => {
 			const handleAppClosing = (e) => {
 				e.preventDefault();
@@ -59,7 +29,7 @@ function ActivityHelper({ user }) {
 			return () => {
 				window.removeEventListener("beforeunload", handleAppClosing);
 			};
-		}, []);
+		}, [user]);
 	}
 
 	useCheckOnline(user);

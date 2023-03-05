@@ -32,7 +32,6 @@ export default function FriendsList({ friends }) {
 						className="flex cursor-pointer select-none border border-transparent rounded-sm text-sm md:text-base active:bg-gray-400 hover:bg-gray-600 w-fit px-3 py-2"
 						onClick={(e) => {
 							e.preventDefault();
-							console.log(friend);
 						}}>
 						<div className="flex self-center md:h-12 md:w-12 w-8 h-8 border rounded-full mr-2 overflow-hidden">
 							<img
